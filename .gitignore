@@ -1,39 +1,63 @@
-# History files
-.Rhistory
-.Rapp.history
+title: "R Notebook"
+output: html_notebook
+---
 
-# Session Data files
-.RData
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
-# User-specific files
-.Ruserdata
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
-# Example code in package build process
-*-Ex.R
+```{r}
+#series temporales forecast del precio de la accion
 
-# Output files from R CMD build
-/*.tar.gz
 
-# Output files from R CMD check
-/*.Rcheck/
+inf <- read.csv("../Desktop/sebastian/r studio/cheat sheet/infy-monthly.csv.txt")
 
-# RStudio files
-.Rproj.user/
+tail(inf)
 
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
+# creamos la serie temporal
 
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-.httr-oauth
+inf.ts <- ts(inf$Adj.Close, start = c(1999,3), frequency = 12)
 
-# knitr and R markdown default cache directories
-*_cache/
-/cache/
+# graficamos
 
-# Temporary files created by R markdown
-*.utf8.md
-*.knit.md
+plot(inf.ts)
 
-# R Environment Variables
-.Renviron
+#aplicamos metodo holt-winters
+
+inf.hw <- HoltWinters(inf.ts)
+
+head(inf.hw)
+
+#plot holt-winters
+
+plot(inf.hw, col = "blue",col.predicted = "red")
+```
+```{r}
+# evaluamos la suma de los errores al cuadrado
+
+inf.hw$SSE
+inf.hw$alpha
+inf.hw$beta
+inf.hw$gamma
+```
+
+
+```{r}
+library(forecast)
+
+infy.fore <- forecast(inf.hw, h = 24)
+
+plot(infy.fore)
+```
+
+
+```{r}
+
+# modelos autoregresivos integrados de medias moviles ARIMA
+
+inf.arima <- auto.arima(inf.ts)
+
+summary(inf.arima)
+
+inf.fore <-  forecast(inf.arima, H = 12 )
+plot(inf.fore)
